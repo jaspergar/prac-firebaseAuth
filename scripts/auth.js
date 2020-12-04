@@ -1,4 +1,14 @@
+// add admin cloud function
+const adminForm = document.querySelector('.admin-actions');
+adminForm.addEventListener('submit', (e) => {
+  e.preventDefault();
 
+  const adminEmail = document.querySelector('#admin-email').value;
+  const addAdminRole = functions.httpsCallable('addAdminRole');
+  addAdminRole({ email: adminEmail }).then(result => {
+    console.log(result);
+  });
+});
 
 //  --------- signup ----------------
   
@@ -16,10 +26,16 @@ const signUpForm = document.querySelector('#signup-form');
       auth.createUserWithEmailAndPassword(email,password).then(cred => {
             return db.collection('users').doc(cred.user.uid).set({
                 bio:signUpForm['signup-bio'].value,
+                
             });
+            
       }).then(() => {
         // console.log(cred.user);
+        signUpForm.querySelector('.error').innerHTML = ''
         modalClose('#modal-signup',signUpForm)
+       
+      }).catch(err => {
+        signUpForm.querySelector('.error').innerHTML = err.message
       })
 
   })
@@ -48,9 +64,12 @@ const signUpForm = document.querySelector('#signup-form');
 
        auth.signInWithEmailAndPassword(email,password).then(cred => {
         //    console.log('you are now signIn.' ,cred.user)
+        loginForm.querySelector('.error').innerHTML = '';
         modalClose('#modal-login',loginForm)
           
-       })
+       }).catch(err => {
+        loginForm.querySelector('.error').innerHTML = err.message
+      })
   })
 
 
@@ -60,8 +79,12 @@ const signUpForm = document.querySelector('#signup-form');
   auth.onAuthStateChanged(user => {
         // ------------------- get data from firestore ------------------
       if(user){
+        user.getIdTokenResult().then(idTokenResult => {
+          user.admin = idTokenResult.claims.admin
+          setUpNavUI(user)
+        })
         db.collection('guides').onSnapshot(snapshot => {
-            setUpNavUI(user)
+          
             setUpGuides(snapshot.docs);
             
         }, err => {

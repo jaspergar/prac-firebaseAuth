@@ -1,13 +1,7 @@
 // function that will create the guide list 
    const guidList = document.querySelector('.guides');
-  
-
    const setUpGuides = (data) =>{
- 
      let html = ' ';
-
-   
-
      if(data.length){
       data.forEach(doc => {
         const guide = doc.data();
@@ -33,14 +27,21 @@
 // function that will make the navbar status change when login or logout
    const loginLinks = document.querySelectorAll('.logged-in');
    const logoutLinks = document.querySelectorAll('.logged-out');
-   const accountDetails = document.querySelector('.account-details')
+   const accountDetails = document.querySelector('.account-details');
+   const admin = document.querySelectorAll('.admin');
 
-   const  setUpNavUI = (user) => {
+   const  setUpNavUI = (user ) => {
      if(user){
+         if(user.admin){
+             admin.forEach(item => item.style.display = "block");
+         }
+
       //account info
       db.collection('users').doc(user.uid).get().then(doc => {
-       const html = ` <div> logged in as ${user.email}</div>
+       const html = ` 
+       <div> logged in as ${user.email}</div>
        <div> ${doc.data().bio}</div>
+       <div> ${user.admin ? 'Admin' : ' '}</div>
        `
 
        accountDetails.innerHTML = html
@@ -49,6 +50,8 @@
        loginLinks.forEach(item => item.style.display = "block");
        logoutLinks.forEach(item => item.style.display = "none");
      }else{
+      admin.forEach(item => item.style.display = "none")
+
       loginLinks.forEach(item => item.style.display = "none");
       logoutLinks.forEach(item => item.style.display = "block");
      }
